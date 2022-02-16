@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @File : framecat.py
+# @Author : r.yang
+# @Date : Wed Feb 16 13:38:25 2022
+# @Description :
+
+import argparse
+from typing import List
+from collections import defaultdict
+from dataclasses import dataclass
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--layers", "-l")
+parser.add_argument("--desc", "-d")
+args = parser.parse_args()
+
+
+@dataclass
+class Layer:
+    id: int
+    elements: List[str]
+    desc: str
+
+    max_len: int
+    pad_lens: List[int]
+    ele_lens: List[int]
+
+
+def parse() -> List[Layer]:
+    layers = args.layers.split(",")
+    descs = args.desc.split(",")
+    if len(layers) != len(descs):
+        raise ValueError
+
+    res = []
+    for i, layer in enumerate(layers):
+        res.append(
+            Layer(
+                id=i,
+                elements=layer.split("|"),
+                desc=descs[i],
+                max_len=0,
+                pad_lens=[],
+                ele_lens=[],
+            )
+        )
+
+    return res
+
+
+class Renderer:
+    pass
+
+
+class TerminalRenderer(Renderer):
+    def __init__(self, cell_horizontal="-", cell_vertical="|", cell_corner="+") -> None:
+        super().__init__()
+        self.cell_horizontal = cell_horizontal
+        self.cell_vertical = cell_vertical
+        self.cell_corner = cell_corner
+        self.padding = 2
+
+    def render(self, layers: List[Layer]) -> None:
+
+        max_len = self._pad_layers(layers)
+
+        layer_groups: List[list] = []
+        for layer in layers:
+            if layer.desc != "-":
+                layer_groups.append([layer])
+            else:
+                if not layer_groups:
+                    raise ValueError('first desc is not supposed to be "-"')
+                layer_groups[-1].append(layer)
+
+        print(self.cell_corner + self.cell_horizontal * max_len + self.cell_corner)
+        for layers in layer_groups:
+            if len(layers) == 1:
+                s = self._render_layer(layers[0])
+                if layers[0].desc:
+                    s += f"{self.cell_horizontal * self.padding * 4}> {layers[0].desc}"
+                print(s)
+                print(
+                    self.cell_corner + self.cell_horizontal * max_len + self.cell_corner
+                )
+            else:
+                for i, layer in enumerate(layers):
+                    s = self._render_layer(layer)
+                    if layers[0].desc:
+                        s += f"{self.cell_horizontal * self.padding * 2}{self.cell_corner}"
+                        if i == len(layers) // 2 and len(layers) % 2 == 1:
+                            s += f"{self.cell_horizontal*2}-> {layers[0].desc}"
+                    print(s)
+
+                    end = (
+                        self.cell_corner
+                        + self.cell_horizontal * max_len
+                        + self.cell_corner
+                    )
+                    if i < (len(layers) - 1) and layers[0].desc:
+                        end += f"{' ' * self.padding * 2}{self.cell_vertical}"
+                        if i == len(layers) // 2 - 1 and len(layers) % 2 == 0:
+                            end += f"{self.cell_horizontal * self.padding}-> {layers[0].desc}"
+                    print(end)
+
+    def _pad_layers(self, layers: List[Layer]):
+        max_len = 0
+
+        for layer in layers:
+            for ele in layer.elements:
+                layer.ele_lens.append(
+                    max([len(i) + self.padding * 2 for i in ele.split("\n")])
+                )
+            max_len = max(max_len, sum(layer.ele_lens) + len(layer.ele_lens) + 1)
+
+        for layer in layers:
+            layer.max_len = max_len
+            pad_len = (
+                max_len
+                - sum([ele_len for ele_len in layer.ele_lens])
+                - len(layer.elements)
+                + 1
+            ) // len(layer.elements)
+            layer.pad_lens = [i + pad_len for i in layer.ele_lens]
+
+        return max_len
+
+    def _render_layer(self, layer: Layer) -> str:
+        tmp = []
+        for ele in layer.elements:
+            tmp.append(ele.split("\\n"))
+
+        sub_layer_len = max([len(i) for i in tmp])
+        for eles in tmp:
+            while len(eles) < sub_layer_len:
+                eles.append("")
+
+        s_list = []
+        for i in range(sub_layer_len):
+            s = self.cell_vertical.join(
+                [eles[i].center(layer.pad_lens[j], " ") for j, eles in enumerate(tmp)]
+            ).center(layer.max_len, " ")
+            s_list.append(f"{self.cell_vertical}{s}{self.cell_vertical}")
+        return "\n".join(s_list)
+
+
+def main():
+    layers = parse()
+    TerminalRenderer().render(layers)
+
+
+if __name__ == "__main__":
+    main()
