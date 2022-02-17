@@ -11,8 +11,11 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--layers", "-l")
-parser.add_argument("--desc", "-d")
+parser.add_argument("--layers", "-l", type=str)
+parser.add_argument("--desc", "-d", type=str)
+parser.add_argument("--cell_horizontal", "-ch", type=str, default='-')
+parser.add_argument("--cell_vertical", "-cv", type=str, default='|')
+parser.add_argument("--cell_corner", "-cc", type=str, default='+')
 args = parser.parse_args()
 
 
@@ -147,7 +150,7 @@ class TerminalRenderer(Renderer):
 
 def main():
     layers = parse()
-    TerminalRenderer().render(layers)
+    TerminalRenderer(args.cell_horizontal, args.cell_vertical, args.cell_corner).render(layers)
 
 
 if __name__ == "__main__":
