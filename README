@@ -1,22 +1,25 @@
-# Layercat
-
-cat your layeres in terminal.
-
-## install
-
-```bash
-git clone https://github.com/Yangruipis/layercat.git && cd layercat
-
-python setup.py install
-```
+ _        _    __   __  ___   ___    ___     _     _____
+| |      /_\   \ \ / / | __| | _ \  / __|   /_\   |_   _|
+| |__   / _ \   \ V /  | _|  |   / | (__   / _ \    | |
+|____| /_/ \_\   |_|   |___| |_|_\  \___| /_/ \_\   |_|
 
 
-## examples
+Cat your layers in terminal.
 
-### 1. TCP four layer
+install
+-----------------
 
-```bash
-$ layercat --layers 'Application,Transport,Internet,Network Access' --desc '应用层(比如HTTP),传输层(比如TCP、UDF),网络层（IP协议）,数据链路层'
+    git clone https://github.com/Yangruipis/layercat.git && cd layercat
+    python setup.py install
+
+
+examples
+-----------------
+
+(1) TCP four layers
+
+    layercat --layers 'Application,Transport,Internet,Network Access' --desc '应用层(比如HTTP),传输层(比如TCP、UDF),网络层（IP协议）,数据链路层'
+
 +--------------------+
 |    Application     |--------> 应用层(比如HTTP)
 +--------------------+
@@ -26,13 +29,12 @@ $ layercat --layers 'Application,Transport,Internet,Network Access' --desc '应�
 +--------------------+
 |   Network Access   |--------> 数据链路层
 +--------------------+
-```
-
-### 2. OSI seven layer
 
 
-```bash
-layercat --layers 'Application,Presentation,Session,Transport,Internet,Data Link,Physical' --desc '应用层,-,-,传输层,网络层,数据 链路 层,-'
+(2) OSI seven layer
+
+    layercat --layers 'Application,Presentation,Session,Transport,Internet,Data Link,Physical' --desc '应用层,-,-,传输层,网络层,数据 链路 层,-'
+
 +------------------+
 |   Application    |----+
 +------------------+    |
@@ -48,13 +50,11 @@ layercat --layers 'Application,Presentation,Session,Transport,Internet,Data Link
 +------------------+    |---> 数据链路层
 |     Physical     |----+
 +------------------+
-```
 
-### 3. Complicated cases
+(3) Complicated cases
 
+    layercat --layers 'Application|Presentation|Session,Transport,Internet,Data Link,Physical' --desc '应用层,传输层,网络层,数据链路层,-'
 
-```bash
-layercat --layers 'Application|Presentation|Session,Transport,Internet,Data Link,Physical' --desc '应用层,传输层,网络层,数据链路层,-'
 +----------------------------------------------+
 |   Application  |  Presentation  |  Session   |--------> 应用层
 +----------------------------------------------+
@@ -66,10 +66,9 @@ layercat --layers 'Application|Presentation|Session,Transport,Internet,Data Link
 +----------------------------------------------+    |---> 数据链路层
 |                   Physical                   |----+
 +----------------------------------------------+
-```
 
-```bash
-./layercat --layers 'Application\nLayer|Presentation\nLayer|Session\nLayer\n(*),Transport,Internet,Data Link,Physical' --desc '应用层,传输层,网络层,数据链路层,-' -ch = -cv "#" -cc "@"
+   layercat --layers 'Application\nLayer|Presentation\nLayer|Session\nLayer\n(*),Transport,Internet,Data Link,Physical' --desc '应用层,传输层,网络层,数据链路层,-' -ch = -cv "#" -cc "@"
+
 @========================================================================@
 #      Application      #      Presentation     #        Session         #
 #         Layer         #         Layer         #         Layer          #
@@ -83,4 +82,3 @@ layercat --layers 'Application|Presentation|Session,Transport,Internet,Data Link
 @========================================================================@    #==-> 数据链路层
 #                                Physical                                #====@
 @========================================================================@
-```
